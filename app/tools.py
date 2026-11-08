@@ -77,3 +77,35 @@ def get_lecture_summary(lecture: int) -> str:
         available = sorted(p.stem for p in (DATA_DIR / "lectures").glob("*.md"))
         return f"第{lecture}回の要点はまだありません。用意されている回: {', '.join(available)}"
     return path.read_text(encoding="utf-8")
+
+
+from datetime import datetime
+
+def save_learning_log(lecture: int, content: str) -> str:
+    """指定された講義回の学習内容をファイルに保存する。
+
+    ユーザーが学習記録の保存を依頼したときに使う。
+    実行には人間の承認が必要。
+
+    Args:
+        lecture: 講義回の番号（例: 3）
+        content: 保存する学習内容
+    """
+    if lecture < 1:
+        return "講義回は1以上を指定してください。"
+
+    if not content.strip():
+        return "保存する学習内容が空です。"
+
+    log_dir = Path(__file__).resolve().parent.parent / "learning_log"
+    log_dir.mkdir(parents=True, exist_ok=True)
+
+    file_path = log_dir / f"lecture_{lecture:02d}.md"
+
+    timestamp = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
+
+    with file_path.open("a", encoding="utf-8") as f:
+        f.write(f"\n## {timestamp}\n")
+        f.write(content.strip() + "\n")
+
+    return f"学習記録を {file_path} に保存しました。"
